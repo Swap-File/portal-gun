@@ -1,0 +1,6 @@
+ahrs-visualizer
+*.so
+*.o
+*.d
+\#*\#
+*~
