@@ -12,7 +12,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-
+#include <softPwm.h>
 #include <signal.h>
 
 void     INThandler(int);
@@ -22,7 +22,7 @@ void     INThandler(int);
 #define ORANGE_LED 3
 #define BLUE_BUTTON_PIN 7
 #define ORANGE_BUTTON_PIN 0
-#define PWM_LED 1
+#define PWM_LED 4
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
@@ -197,7 +197,10 @@ int main(void) {
 	pinMode(ORANGE_BUTTON_PIN,INPUT );
 	pinMode(BLUE_LED,OUTPUT );
 	pinMode(ORANGE_LED,OUTPUT );
-	pinMode(PWM_LED,PWM_OUTPUT );
+	//pinMode(PWM_LED,PWM_OUTPUT );
+	//pinMode(PWM_LED,OUTPUT );
+	//digitalWrite (PWM_LED,1); //turn on
+	softPwmCreate(PWM_LED, 0, 100) ;
 	
 	struct station {
 		int source;
@@ -247,7 +250,7 @@ int main(void) {
 	while ( 1 ) {
 		
 		delay(20);
-
+		
 		time_this_cycle = millis();
 		
 		fps++;
@@ -381,16 +384,16 @@ int main(void) {
 		int matching_station_index = 0;
 		while (matching_station_index < MAX_STATIONS && matching_station_index < known_stations){
 			if (time_this_cycle - station_data[matching_station_index].time > STATION_EXPIRE){ //1 second expire time
-				if (known_stations == 1){ //this should never happen, the self station should never expire, but covered just in case
-					known_stations--;
-				}else{
+				//if (known_stations == 1){ //this should never happen, the self station should never expire, but covered just in case
+				//	known_stations--;
+				//}else{
 					station_data[matching_station_index].source = station_data[known_stations-1].source;
 					station_data[matching_station_index].state = station_data[known_stations-1].state;
 					station_data[matching_station_index].offset = station_data[known_stations-1].offset;		
 					station_data[matching_station_index].time = station_data[known_stations-1].time;	
 					known_stations--;
 					matching_station_index--; //check the station we just moved
-				}
+				//}
 			}
 			matching_station_index++;
 		}
@@ -473,12 +476,14 @@ int main(void) {
 		}else{
 			//code to pull out of self state
 			if ((remote_state_previous != remote_state )&& (remote_state <= -2)){
-				self_state = 0;
+				cmus_remote_play("/home/pi/portalgun/portal_open2.wav");		
+				
 				if (self_state <= -3 || self_state>=3){
 					local_state = 4;
 				}else {
 					local_state = 2;
 				}
+				self_state = 0;
 			}
 		}
 		
@@ -618,6 +623,7 @@ int main(void) {
 			}
 		}
 		
+
 		
 		//on quick swap to transmit
 		if ((self_state_previous != -4 && self_state == -4) || (self_state_previous != 4  && self_state == 4) ){
@@ -666,6 +672,10 @@ int main(void) {
 			}
 			omxplayer_kill();
 			omxplayer_running = 0;
+			
+		}
+		
+		if (( self_state_previous > 3 && self_state == 3) || (self_state_previous < -3 && self_state == -3)){
 			cmus_remote_play("/home/pi/portalgun/portal_close1.wav");
 		}
 		
@@ -674,6 +684,7 @@ int main(void) {
 			omxplayer_kill();
 			omxplayer_running = 0;
 			printf("OMXPLAYER: Emergency Kill switch\n");
+			
 		}
 
 		iptables_update(&time_this_cycle);  //update iptables, time is given to prevent flooding
@@ -684,10 +695,12 @@ int main(void) {
 		float buttonbrightness = ledcontrol_update(color1,width_request,width_speed,shutdown_effect, total_time_offset);
 		
 		if (known_stations > 0){
-		
-		pwmWrite(PWM_LED,int( 1024 * buttonbrightness));
+
+		//pwmWrite(PWM_LED,);
+		softPwmWrite (PWM_LED, int( 100 * buttonbrightness)) ;
 		}else{
-		pwmWrite(PWM_LED,int( 64));
+		//pwmWrite(PWM_LED,int( 64));
+		softPwmWrite (PWM_LED, 8) ;
 		}
 
 		//debug

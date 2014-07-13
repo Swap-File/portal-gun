@@ -1,2 +1,2 @@
 all:
-	gcc -o portal pipecontrol.cpp udpcontrol.cpp ledcontrol.cpp portal.cpp -lwiringPi -lm
+	gcc -o portal pipecontrol.cpp udpcontrol.cpp ledcontrol.cpp portal.cpp -lwiringPi -lpthread -lm
