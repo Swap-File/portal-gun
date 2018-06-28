@@ -5,6 +5,6 @@ Gun:
 
 [Ubiquiti airGateway](https://www.ubnt.com/accessories/airgateway/) + USB Sound Card (for Microphone)
 
-[Pololu MinIMU-9 v2](https://www.pololu.com/product/1268) 
+[Pololu MinIMU-9 v2](https://www.pololu.com/product/1268) + LPD8806 LEDs
 
  4S 5000mAh Lipo + 3 Amp 5v regulator
